@@ -8,16 +8,11 @@ import (
 )
 
 func main() {
-
-	//testEncDecPem()
-	//testEncDecPfx()
-	//testSignPem()
-	//testSignPfx()
-	aes_key := "ed4f8731b6ae7a19"
-	encry_msg := "k4pBEkQrvic457iQ/xaL5n3dm/vH+atfYRfSCxHsymg="
-
-	data := AesDecry(aes_key, encry_msg)
-	fmt.Printf("data[%s]\n", data)
+	msg := "admin123"
+	encStr := RsaEncry(msg, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_public_key_copy.pem`)
+	fmt.Printf("加密后：[%s]\n", encStr)
+	text := RsaDecry(encStr, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_private_key_copy.pem`)
+	fmt.Printf("解密后：[%s]\n", text)
 
 }
 

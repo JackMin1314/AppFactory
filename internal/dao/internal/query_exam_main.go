@@ -36,6 +36,9 @@ type queryExamMainColumns struct {
     ClassRate     string // 班级排名  
     SchoolRate    string // 年级排名  
     StepRank      string // 进退名次  
+    UploadDate    string // 上传日期  
+    IsDeleted     string // 是否删除  
+    DeleteTime    string // 删除时间  
     CreatedAt     string //           
     UpdatedAt     string //
 }
@@ -57,6 +60,9 @@ var (
             ClassRate:    "class_rate",     
             SchoolRate:   "school_rate",    
             StepRank:     "step_rank",      
+            UploadDate:   "upload_date",    
+            IsDeleted:    "is_deleted",     
+            DeleteTime:   "delete_time",    
             CreatedAt:    "created_at",     
             UpdatedAt:    "updated_at",
 		},
