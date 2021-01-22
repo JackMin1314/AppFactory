@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"strings"
 
 	"golang.org/x/crypto/pkcs12"
 )
@@ -212,10 +213,24 @@ func LoadRSAPrivatePEM(buf string) (*RSAKey, error) {
 	if len(block.Bytes) == 0 {
 		return nil, fmt.Errorf("读取RSA密钥文件w为空[%s]", r.KeyFile)
 	}
-	r.PrivateKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("ParsePKCS1PrivateKey err:%s", err)
+	//pkcs1
+	if strings.Index(buf, "BEGIN RSA") > 0 {
+		r.PrivateKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("ParsePKCS1PrivateKey err:%s", err)
+		}
+	} else { //pkcs8
+		privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, fmt.Errorf("ParsePKCS8PrivateKey err:%s", err)
+		}
+		r.PrivateKey = privateKey.(*rsa.PrivateKey)
 	}
+
+	// r.PrivateKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("ParsePKCS1PrivateKey err:%s", err)
+	// }
 	r.Modules = (r.PrivateKey.N.BitLen() + 7) / 8
 	return r, nil
 }

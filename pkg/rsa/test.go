@@ -3,6 +3,7 @@ package main
 import (
 	// "AppFactory/internal/pkg/rsa/security"
 	"AppFactory/pkg/rsa/security"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 )
@@ -13,6 +14,19 @@ func main() {
 	fmt.Printf("加密后：[%s]\n", encStr)
 	text := RsaDecry(encStr, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_private_key_copy.pem`)
 	fmt.Printf("解密后：[%s]\n", text)
+
+	testSignPem()
+
+	fmt.Println("**************")
+	AesCipherStr := `EA108F24A7ABCA35EC3D0E31F3139B5B87EB4988C888F1D940550B7AE2631C6647D09F929E764D49C1941C45B13065F4BCC38F2816F4DC7E993E5FE1F4DC5C9FC574AE9A7BD3B2DD5C27B5660958D348E98C0331907B214F89373649908A675CAEF3B010FD471B83E24FE57002C74A6D4B7AC7C950B6652726FD4D4AC970B5A2E7B3B524B58350E05F52EDABCB8898BA96CEF2D887681E2F1A94547CC49F4C960D0A2085B6EEF26E2572481DD9402892507979E19FD561D826E803084356FBECD01837FBE98B72D0B6DF9D8449CE641358CAFBDAE88EEE7F08F940AA46B75D0F4ABFA13A1AD760FC2CC396423E9CF4BFCD534A4E506D8A0585B92322001CF2EF46770CE1B2D5912F5B7977A801DF0E92A346A55EF2A34908E3028A2C1C58A107C53985A14A9A2E6121D76F1D6F38957C6ED1218D7CF3EF6CC477CB002BF0B5F1E38AA9DAD40E38EF2D240DB9C9C0D628A8BAF54A0F1387C723FE63915AFF92F43C57A763A399CBD645A29718A3E092E5CCCE2698262864F2556BD74792E38F1B`
+	sysAesKey := `54NrlJk13wU6pn==`
+	byteCipher, _ :=  hex.DecodeString(AesCipherStr)
+	data, err := security.AESDecrypt(byteCipher, []byte(sysAesKey), security.AES_ECB_PKCS5PADDING)
+	if err != nil {
+		fmt.Printf("用户信息解密失败[%s]", err)
+	}
+	fmt.Printf("AES解密结果[%s]", data)
+
 
 }
 
@@ -33,14 +47,18 @@ func testEncDecPfx() {
 }
 
 func testSignPem() {
-	signbuf := "accessType=0&bizType=000201&currencyCode=156"
-	signature, err := SignPem([]byte(signbuf), "./etc/local_pri_sys.pem")
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("signature[%s]\n", signature)
-
-	err = VertifyPem(signbuf, signature, "./etc/local_pub_sys.pem")
+	// signature, err := SignPem([]byte(signbuf), `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_private_key_copy.pem`)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Printf("signature[%s]\n", signature)
+	signbuf := "brh_id=1099991049&content=8BD0EDDAF1ED371DA4D454811723B814A4EF73760321EBE5189652B1409C0C2ADAB1F3B788CC614DF4D6C794EDA95AD17B82CACAF3C9313ADF72585284FBC4E5A389344AFE73FE75840B05F7B71A1233ED54F908C7C696ECB254A68B76874DC76FC61EC56D54C6BA7BD5A4C498F33803E80F3740E8E2BB4CC046CC1A6A99692F7D04F4EA5C76ED50535C3B9899247A303BA0388D2ADB71DC35BE9E2E8805ED7B08F9002D1569575F3C2B28E068A9A25F3CFE720997B158F9F1CC6C20C1838D909B6B7F5435BE8BF3A3B8075F80FCC2DD&request_id=1611207121175&version=1.0"
+	Jsignature := "OlYQCTHB5eKYkInk8YZvRxNMAuVM5x3T65A0HVwuL5vOW5JsbaBw0hiTkKujU7foJT1IuIEBDAxNYSzjHuL0Y9+E91N7Kwj7k/el/14Wp+WSUw/ziXidvrVjUP/WtDE3kzvKJM/2ylYcWN8DxzO9Quo9/DPPxcMPedwv+hgSFys="
+	// SignedStr := `MAdIYkHPA0cHkIjVS6sbrLEHpf3KXjbv71vqhG3vhRYodhyc1oo1H936MM3gHZOjI0ccusa6WC87GOWYjA2ycQLxCaFlyQtAeMObYnvNEKqLvfW0slbDXzE7163mSH4Nj3ov3bb27SEbB3O85QjDjlNdf2XBGusV8IHF8nJEdx4=`
+	signature, err := SignPem([]byte(signbuf), `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\Jrsa_private_key_copy.pem`)
+	fmt.Printf("Jsignature[%s]\n", Jsignature)
+	fmt.Printf("Gsignature[%s]\n", signature)
+	err = VertifyPem(signbuf, signature, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_public_key_copy.pem`)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -206,7 +224,8 @@ func SignPem(signBuf []byte, priKey string) (string, error) {
 	if err != nil {
 		fmt.Printf("加载私钥失败\n")
 	}
-	s, err := rsaKey.Sign(security.SHA256WithRSA, signBuf)
+	// 这里修改了sha256WithRsa 为 MD5WithRSA方便测试
+	s, err := rsaKey.Sign(security.MD5WithRSA, signBuf)
 	if err != nil {
 		fmt.Printf("签名失败[%s]", err)
 		return "", err
