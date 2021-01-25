@@ -2,31 +2,90 @@ package main
 
 import (
 	// "AppFactory/internal/pkg/rsa/security"
+	tools "AppFactory/internal/pkg"
 	"AppFactory/pkg/rsa/security"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 )
 
 func main() {
-	msg := "admin123"
-	encStr := RsaEncry(msg, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_public_key_copy.pem`)
-	fmt.Printf("加密后：[%s]\n", encStr)
-	text := RsaDecry(encStr, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_private_key_copy.pem`)
-	fmt.Printf("解密后：[%s]\n", text)
+	// msg := "admin123"
+	// encStr := RsaEncry(msg, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_public_key_copy.pem`)
+	// fmt.Printf("加密后：[%s]\n", encStr)
+	// text := RsaDecry(encStr, `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_private_key_copy.pem`)
+	// fmt.Printf("解密后：[%s]\n", text)
 
-	testSignPem()
+	// testSignPem()
 
 	fmt.Println("**************")
-	AesCipherStr := `EA108F24A7ABCA35EC3D0E31F3139B5B87EB4988C888F1D940550B7AE2631C6647D09F929E764D49C1941C45B13065F4BCC38F2816F4DC7E993E5FE1F4DC5C9FC574AE9A7BD3B2DD5C27B5660958D348E98C0331907B214F89373649908A675CAEF3B010FD471B83E24FE57002C74A6D4B7AC7C950B6652726FD4D4AC970B5A2E7B3B524B58350E05F52EDABCB8898BA96CEF2D887681E2F1A94547CC49F4C960D0A2085B6EEF26E2572481DD9402892507979E19FD561D826E803084356FBECD01837FBE98B72D0B6DF9D8449CE641358CAFBDAE88EEE7F08F940AA46B75D0F4ABFA13A1AD760FC2CC396423E9CF4BFCD534A4E506D8A0585B92322001CF2EF46770CE1B2D5912F5B7977A801DF0E92A346A55EF2A34908E3028A2C1C58A107C53985A14A9A2E6121D76F1D6F38957C6ED1218D7CF3EF6CC477CB002BF0B5F1E38AA9DAD40E38EF2D240DB9C9C0D628A8BAF54A0F1387C723FE63915AFF92F43C57A763A399CBD645A29718A3E092E5CCCE2698262864F2556BD74792E38F1B`
+	AesCipherStr := `6F34D9A8BF9B30E70B7381B68304752F8BA5BF02BDFA64814E5F65AACBBC003FD482A772F3471E5AAEA32BF8B777719753542DDBA135284B95D24C83B3B6DD3BD9C408E3B896269C287F767757A1C9A3A5AE0AFCE0EE11AB4DC960FB496DD45CAC3A31E710C803BDF910686E234FCF86129BB22348944CC62FA05A047D327527115A9452EC63104670833478A82C43AE8AD71D18F0AD31067EFB26BA418130C315871FE52329EAC998BB9C753174CFBD11855A4800D0D1DB0F9D480672D9E36BECCC3DF50207F1B3BC68AA67B5901B154960AEC9F7D155AAC043FC41E2E6B7F37847831FED4263B59E5DFE917C7FF865FFA5484242A8E0240249CACA9E53E12B`
 	sysAesKey := `54NrlJk13wU6pn==`
-	byteCipher, _ :=  hex.DecodeString(AesCipherStr)
+	byteCipher, _ := hex.DecodeString(AesCipherStr)
 	data, err := security.AESDecrypt(byteCipher, []byte(sysAesKey), security.AES_ECB_PKCS5PADDING)
 	if err != nil {
 		fmt.Printf("用户信息解密失败[%s]", err)
 	}
-	fmt.Printf("AES解密结果[%s]", data)
+	fmt.Printf("AES解密结果[%s]\n", data)
+	fmt.Println("**************")
+	// 模拟解析响应报文信息
+	formStr := `sign=QpTGUDrIL6%2BpMf01oQCfpwA7ACS8oIpge2Ke2jdfMZvKmLlrq967F1ZLSG%2FkBeei4EdxwBoXwHXxdjKOBDzvfI%2BgTpDMuhSNN8dURHu6%2F6Qod6RNoW9GZPtpPYL%2Fvyh%2Fw3iXDf4eSSumgqGjFnupYzbFrcuZfQEY9Wj9qZqxJMs%3D&version=1.0&request_id=2021012515460140653356&content=EA108F24A7ABCA35EC3D0E31F3139B5B87EB4988C888F1D940550B7AE2631C6647D09F929E764D49C1941C45B13065F4BCC38F2816F4DC7E993E5FE1F4DC5C9FC574AE9A7BD3B2DD5C27B5660958D348E98C0331907B214F89373649908A675CAEF3B010FD471B83E24FE57002C74A6D4B7AC7C950B6652726FD4D4AC970B5A2E7B3B524B58350E05F52EDABCB8898BA96CEF2D887681E2F1A94547CC49F4C9607AF94BC71E989E4E7EC4C2213E3DBBE507979E19FD561D826E803084356FBECD01837FBE98B72D0B6DF9D8449CE641358CAFBDAE88EEE7F08F940AA46B75D0F4ABFA13A1AD760FC2CC396423E9CF4BF4E6DF30F5465C6EBE7755102EE73FC505FF8F8C76697EDD6871265F469AEE9437F0BC0F363A0220B76CCF8C5B82FD474F6F501D66227C21264825E0F2E356B99A9F89A0E46687001C204CBE89861B543F59106C23D8B028D4769BA434EB9CAA16FB832560593EFC131568DC320491E1D25AA58478816198A0D4C1FAB92BF9D3903B2A0E5E8169ED5BFD9C6094D6D655B`
+	item := tools.ParseUrl(formStr)
 
+	// // 输出全部内容
+	// for key, value := range item {
+	// 	if key == "content" {
+	// 		byteCipher, _ := hex.DecodeString(value[0])
+	// 		data, _ := security.AESDecrypt([]byte(byteCipher), []byte(sysAesKey), security.AES_ECB_PKCS5PADDING)
+	// 		fmt.Println(key, "-->", string(data))
+	// 	} else {
+	// 		fmt.Println(key, "-->", value[0])
+	// 	}
+
+	// }
+
+	type SGNotifyReq struct {
+		Version   string `json:"version,omitempty" post:"version,omitempty"`       //版本号
+		Sign      string `json:"sign,omitempty" post:"sign,omitempty"`             //签名
+		Content   string `json:"content,omitempty" post:"content,omitempty"`       // 业务请求参数集合
+		RequestID string `json:"request_id,omitempty" post:"request_id,omitempty"` // 请求流水号
+	}
+	type SGNotifyContent struct {
+		OrderID      string `json:"order_id,omitempty" post:"order_id,omitempty"`
+		TxnStatus    string `json:"txn_status,omitempty" post:"txn_status,omitempty"`
+		CreateTime   string `json:"create_time,omitempty" post:"create_time,omitempty"`
+		ChnlRespCode string `json:"chnl_resp_code,omitempty" post:"chnl_resp_code,omitempty"`
+		ChnlRespMsg  string `json:"chnl_resp_msg,omitempty" post:"chnl_resp_msg,omitempty"`
+		MerID        string `json:"mer_id,omitempty"  post:"mer_id,omitempty"`            //商户号
+		MerOrderID   string `json:"mer_order_id,omitempty" post:"mer_order_id,omitempty"` // 商户订单号
+		TxnAmount    string `json:"txn_amount,omitempty" post:"txn_amount,omitempty"`     // 交易金额(分)
+		TxnFee       string `json:"txn_fee,omitempty" post:"txn_fee,omitempty"`           // 手续费(分)
+		AcctNo       string `json:"acct_no,omitempty" post:"acct_no,omitempty"`           // 账号
+		AcctName     string `json:"acct_name,omitempty" post:"acct_name,omitempty"`       // 账号名称 对公账户必填
+		GpayMerID    string `json:"gpay_mer_id,omitempty" post:"gpay_mer_id,omitempty"`   // 代付商户号
+	}
+	// 按需获取
+	notifyReq := new(SGNotifyReq)
+	notifyContent := new(SGNotifyContent)
+
+	notifyReq.Version = item.Get("version")
+	notifyReq.RequestID = item.Get("request_id")
+	notifyReq.Sign = item.Get("sign")
+	notifyReq.Content = item.Get("content")
+
+	CipherContent, _ := hex.DecodeString(notifyReq.Content)
+	ContentJSONStr, _ := security.AESDecrypt([]byte(CipherContent), []byte(sysAesKey), security.AES_ECB_PKCS5PADDING)
+
+	err = VertifyPem(tools.Signbuf2(notifyReq), item.Get("sign"), `D:\codeRepo\Golang\AppFactory\pkg\rsa\etc\rsa_public_key_copy.pem`)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("验签成功")
+	}
+
+	json.Unmarshal([]byte(ContentJSONStr), notifyContent)
+	fmt.Printf("notifyReq:[%+v]\ncontent:[%+v]\n", notifyReq, notifyContent)
 
 }
 
@@ -249,5 +308,6 @@ func VertifyPem(signBuf, signature, pubKey string) error {
 	}
 	bs := security.DecodeBase64([]byte(signature))
 
-	return rsaKey.Verify(security.SHA256WithRSA, []byte(signBuf), bs)
+	// return rsaKey.Verify(security.SHA256WithRSA, []byte(signBuf), bs)
+	return rsaKey.Verify(security.MD5WithRSA, []byte(signBuf), bs)
 }
