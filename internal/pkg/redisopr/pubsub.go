@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"uncresys/modules/log"
-
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
 )
@@ -18,6 +16,7 @@ func SubChannels(ctx context.Context,
 	// the connection and server.
 	const healthCheckPeriod = 20 * time.Second
 
+	// TODO 创建logger日志对象
 	logger, err := log.ContextEntry(ctx)
 	if err != nil {
 		return err
