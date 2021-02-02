@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-//压缩 使用gzip压缩成tar.gz
+// Compress 压缩 使用gzip压缩成tar.gz
 func Compress(files []*os.File, dest string) error {
 	d, _ := os.Create(dest)
 	defer d.Close()
@@ -71,7 +71,7 @@ func compress(file *os.File, prefix string, tw *tar.Writer) error {
 	return nil
 }
 
-//解压 tar.gz
+// DeCompress 解压 tar.gz;会根据dest和tarFile的name创建目录
 func DeCompress(tarFile, dest string) error {
 	srcFile, err := os.Open(tarFile)
 	if err != nil {

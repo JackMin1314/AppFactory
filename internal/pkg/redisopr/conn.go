@@ -46,7 +46,7 @@ func Init(filename string) error {
 	if err != nil {
 		return err
 	}
-	// TODO解析加载配置文件,后面进行优化处理
+	// TODO:解析加载配置文件,后面进行优化处理
 	err = yamlcfg.LoadConfig(fullname, config)
 	if err != nil {
 		return fmt.Errorf("加载配置文件[%s]失败[%s]", fullname, err)

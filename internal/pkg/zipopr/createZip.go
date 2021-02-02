@@ -1,4 +1,4 @@
-package pkg
+package zipopr
 
 import (
 	"archive/zip"
@@ -88,4 +88,42 @@ func CreatZipFile(logger *zap.SugaredLogger, srcDir string, zipFileName string) 
 		return err
 	})
 	return nil
+}
+
+func UnzipDir(logger *zap.SugaredLogger, zipFile, dir string) {
+	absZipFile, err := filepath.Abs(zipFile)
+	if err != nil {
+		logger.Errorf("路径错误[%s]", absZipFile)
+	}
+	r, err := zip.OpenReader(absZipFile)
+	if err != nil {
+		logger.Fatalf("Open zip file failed: %s\n", err.Error())
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		func() {
+			path := dir + string(filepath.Separator) + f.Name
+			os.MkdirAll(filepath.Dir(path), 0755)
+			fDest, err := os.Create(path)
+			if err != nil {
+				logger.Errorf("Create failed: %s\n", err.Error())
+				return
+			}
+			defer fDest.Close()
+
+			fSrc, err := f.Open()
+			if err != nil {
+				logger.Errorf("Open failed: %s\n", err.Error())
+				return
+			}
+			defer fSrc.Close()
+
+			_, err = io.Copy(fDest, fSrc)
+			if err != nil {
+				logger.Errorf("Copy failed: %s\n", err.Error())
+				return
+			}
+		}()
+	}
 }
