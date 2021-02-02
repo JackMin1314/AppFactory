@@ -78,7 +78,8 @@ func Signbuf(val interface{}) string {
 	return signBuf.String()
 }
 
-func Signbuf2(val interface{}) string {
+// SignbufMark 在原基础上新增签名指定名SignbufMark 例:sign、signature等
+func SignbufMark(val interface{}, paramSignName string) string {
 	nameArr := make([]string, 0)
 	keyVal := make(map[string]string, 0)
 	v := reflect.ValueOf(val).Elem()
@@ -94,7 +95,7 @@ func Signbuf2(val interface{}) string {
 				for j := 0; j < sf.NumField(); j++ {
 					name := getname(sf.Field(j).Tag.Get("post"))
 					value := f.Field(j).String()
-					if len(value) > 0 && name != "sign" {
+					if len(value) > 0 && name != paramSignName {
 						nameArr = append(nameArr, name)
 						keyVal[name] = value
 					}
@@ -103,7 +104,7 @@ func Signbuf2(val interface{}) string {
 			}
 			name := getname(st.Field(i).Tag.Get("post"))
 			value := f.String()
-			if len(value) > 0 && name != "sign" {
+			if len(value) > 0 && name != paramSignName {
 				nameArr = append(nameArr, name)
 				keyVal[name] = value
 			}
