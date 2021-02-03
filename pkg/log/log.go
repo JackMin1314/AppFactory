@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	// "github.com/gogf/gf/os/gcfg"
+	"github.com/gogf/gf/os/gcfg"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -51,14 +53,19 @@ func getEncoder() zapcore.Encoder {
 
 // 日志写入文件
 func getLogWriter() zapcore.WriteSyncer {
-	folderPath := "./logs"
+	config := gcfg.Instance("config.toml")
+	if config == nil {
+		panic("config.toml file is not correct or not in config directort")
+	}
+	config.GetJson("log.config")
+	folderPath := config.GetString("log.config.filePath")
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		// 必须分成两步：先创建文件夹、再修改权限
 		os.Mkdir(folderPath, 0777) //0777也可以os.ModePerm
 		os.Chmod(folderPath, 0777)
 	}
-	// TODO:根据配置文件配置的日志路径和文件名
-	folderPath = filepath.Join(folderPath, "Record.log")
+	// 根据配置文件配置的日志路径和文件名
+	folderPath = filepath.Join(folderPath, config.GetString("log.config.fileName"))
 	//_, err := os.Create(folderPath)
 	_, err := os.OpenFile(folderPath, os.O_APPEND|os.O_CREATE, 0666) // os.OpenFile(fileName,os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)会覆盖或重新创建
 	if err != nil {
@@ -66,11 +73,11 @@ func getLogWriter() zapcore.WriteSyncer {
 	}
 	// 新增日志切割和归档
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   folderPath, // 日志文件的位置
-		MaxSize:    10,         // 在进行切割之前，日志文件的最大大小
-		MaxBackups: 30,         // 保留旧文件的最大个数
-		MaxAge:     7,          // 保留旧文件的最大天数
-		Compress:   false,      // 是否压缩
+		Filename:   folderPath,                  // 日志文件的位置
+		MaxSize:    config.GetInt("MaxSize"),    // 在进行切割之前，日志文件的最大大小
+		MaxBackups: config.GetInt("MaxBackups"), // 保留旧文件的最大个数
+		MaxAge:     config.GetInt("MaxAge"),     // 保留旧文件的最大天数
+		Compress:   config.GetBool("Compress"),  // 是否压缩
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }

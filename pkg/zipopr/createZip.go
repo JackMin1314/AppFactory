@@ -11,7 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func CreatZipFile(logger *zap.SugaredLogger, srcDir string, zipFileName string) error {
+// CreatZipFile 根据srcDir路径获取所有文件, zipPathFileName为给定路径生成的zip文件
+func CreatZipFile(logger *zap.SugaredLogger, zipPathFileName, srcDir string) error {
 	dir, err := ioutil.ReadDir(srcDir)
 	if err != nil {
 		logger.Errorf("读取路径出错[%s]", err)
@@ -22,11 +23,11 @@ func CreatZipFile(logger *zap.SugaredLogger, srcDir string, zipFileName string) 
 		return nil
 	}
 	// 预防：旧文件无法覆盖
-	os.RemoveAll(zipFileName)
+	os.RemoveAll(zipPathFileName)
 
 	// 创建：zip文件
-	//zipfile, err := os.Create(zipFileName)
-	zipfile, err := os.OpenFile(zipFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	//zipfile, err := os.Create(zipPathFileName)
+	zipfile, err := os.OpenFile(zipPathFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	defer zipfile.Close()
 	if err != nil {
 		logger.Errorf("创建zip文件出错[%s]", err)
@@ -90,8 +91,9 @@ func CreatZipFile(logger *zap.SugaredLogger, srcDir string, zipFileName string) 
 	return nil
 }
 
-func UnzipDir(logger *zap.SugaredLogger, zipFile, dir string) {
-	absZipFile, err := filepath.Abs(zipFile)
+// UnzipDir 从zipPathFile文件解压到dir中
+func UnzipDir(logger *zap.SugaredLogger, zipPathFile, dir string) {
+	absZipFile, err := filepath.Abs(zipPathFile)
 	if err != nil {
 		logger.Errorf("路径错误[%s]", absZipFile)
 	}
