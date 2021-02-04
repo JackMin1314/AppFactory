@@ -2,7 +2,7 @@ package main
 
 import (
 	// "AppFactory/internal/pkg/rsa/security"
-	tools "AppFactory/internal/pkg"
+	tools "AppFactory/pkg"
 	"AppFactory/pkg/rsa/security"
 	"encoding/hex"
 	"encoding/json"

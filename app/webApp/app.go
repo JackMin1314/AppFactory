@@ -1,0 +1,78 @@
+package webapp
+
+import (
+	"AppFactory/internal/service"
+	"AppFactory/pkg/log"
+	"net/http"
+
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/net/ghttp"
+)
+
+// MiddlewareAuth 认证
+func MiddlewareAuth(r *ghttp.Request) {
+	token := r.Get("token")
+	if token == "123456" {
+		r.Middleware.Next()
+	} else {
+		r.Response.WriteStatus(http.StatusForbidden)
+	}
+}
+
+// MiddlewareCORS 跨域
+func MiddlewareCORS(r *ghttp.Request) {
+	r.Response.CORSDefault()
+	r.Middleware.Next()
+}
+
+// MiddlewareLog 打印日志
+func MiddlewareLog(r *ghttp.Request) {
+
+	logger := log.GetLogInstance()
+	r.Middleware.Next()
+	logger.Info(r.Response.Status, r.URL.Path)
+}
+
+// WebRouterGroup 分组路由
+func WebRouterGroup(group *ghttp.RouterGroup) {
+	group.Middleware(
+		service.Middleware.Ctx,
+		service.Middleware.CORS,
+	)
+
+	group.Group("/api.v2", func(group *ghttp.RouterGroup) {
+
+		group.Middleware(MiddlewareAuth, MiddlewareCORS)
+
+		group.GET("/test", func(r *ghttp.Request) {
+			r.Response.Write("test")
+		})
+
+	})
+
+}
+
+// RunExec 程序运行主逻辑
+func RunExec() {
+	s := g.Server()
+	// s.Domain("127.0.0.1").BindHandler("/", hello1)
+	// s.Domain("localhost").BindHandler("/{class}-{course}/:name/*act", hello2)
+
+	s.Use(MiddlewareLog)
+
+	s.Group("/", WebRouterGroup)
+	s.SetPort(g.Cfg().GetInt("application.port"))
+	s.Run()
+}
+
+// Setup 配置文件加载和组件预先初始化
+func Setup(confName string) {
+	if confName == "" {
+		confName = "config.toml"
+	}
+	// 获取配置文件
+	_ = g.Cfg().SetFileName(confName)
+	// 日志初始化
+	log.InitLogger()
+
+}

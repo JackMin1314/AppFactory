@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	// "github.com/gogf/gf/os/gcfg"
-	"github.com/gogf/gf/os/gcfg"
+	"github.com/gogf/gf/frame/g"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -53,16 +53,15 @@ func getEncoder() zapcore.Encoder {
 
 // 日志写入文件
 func getLogWriter() zapcore.WriteSyncer {
-	config := gcfg.Instance("config.toml")
+	config := g.Cfg("log")
 	if config == nil {
 		panic("config.toml file is not correct or not in config directort")
 	}
-	config.GetJson("log.config")
 	folderPath := config.GetString("log.config.filePath")
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		// 必须分成两步：先创建文件夹、再修改权限
-		os.Mkdir(folderPath, 0777) //0777也可以os.ModePerm
-		os.Chmod(folderPath, 0777)
+		os.Mkdir(folderPath, 0755) //0755也可以os.ModePerm
+		os.Chmod(folderPath, 0755)
 	}
 	// 根据配置文件配置的日志路径和文件名
 	folderPath = filepath.Join(folderPath, config.GetString("log.config.fileName"))
@@ -82,6 +81,7 @@ func getLogWriter() zapcore.WriteSyncer {
 	return zapcore.AddSync(lumberJackLogger)
 }
 
+// GetLogInstance 获取log日志对象
 func GetLogInstance() *zap.SugaredLogger {
 	if sugarLogger != nil {
 		return sugarLogger

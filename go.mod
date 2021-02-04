@@ -11,6 +11,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/segmentio/ksuid v1.0.3
 	github.com/sony/sonyflake v1.0.0
+	github.com/spf13/cobra v1.1.1
 	// github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
