@@ -25,12 +25,20 @@ func MiddlewareCORS(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
-// MiddlewareLog 打印日志
+// MiddlewareLog 全局中间件打印日志
 func MiddlewareLog(r *ghttp.Request) {
 
 	logger := log.GetLogInstance()
 	r.Middleware.Next()
-	logger.Info(r.Response.Status, r.URL.Path)
+	errStr := ""
+	if err := r.GetError(); err != nil {
+		errStr = err.Error()
+	}
+	logger.Info(r.Response.Status, r.URL.Path, errStr)
+	if r.Response.Status >= http.StatusInternalServerError {
+		r.Response.ClearBuffer()
+		r.Response.Writeln("哎哟我去，服务器居然开小差了，请稍后再试吧！")
+	}
 }
 
 // WebRouterGroup 分组路由
@@ -46,6 +54,7 @@ func WebRouterGroup(group *ghttp.RouterGroup) {
 
 		group.GET("/test", func(r *ghttp.Request) {
 			r.Response.Write("test")
+			panic("service err ,hahahah")
 		})
 
 	})

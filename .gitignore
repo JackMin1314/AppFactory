@@ -1,6 +1,6 @@
 /etc
 /logs
-/config
+/config/*.toml
 /build
 /test
 /pkg/rsa/etc
