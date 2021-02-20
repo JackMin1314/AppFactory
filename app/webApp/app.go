@@ -53,8 +53,8 @@ func WebRouterGroup(group *ghttp.RouterGroup) {
 		group.Middleware(MiddlewareAuth, MiddlewareCORS)
 
 		group.GET("/test", func(r *ghttp.Request) {
-			r.Response.Write("test")
-			panic("service err ,hahahah")
+			r.Response.Write("receive it, ok")
+			// panic("service err ,hahahah")
 		})
 
 	})
