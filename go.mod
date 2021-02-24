@@ -6,6 +6,7 @@ require (
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.3.2
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-kratos/kratos/v2 v2.0.0-alpha3
 	github.com/gogf/gf v1.15.0
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/pkg/errors v0.9.1
@@ -17,4 +18,5 @@ require (
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	gopkg.in/yaml.v2 v2.2.8
 )

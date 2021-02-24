@@ -2,6 +2,7 @@ package webapp
 
 import (
 	"AppFactory/internal/service"
+	"AppFactory/pkg/config"
 	"AppFactory/pkg/log"
 	"net/http"
 
@@ -76,12 +77,8 @@ func RunExec() {
 
 // Setup 配置文件加载和组件预先初始化
 func Setup(confName string) {
-	if confName == "" {
-		confName = "config.toml"
-	}
-	// 获取配置文件
-	_ = g.Cfg().SetFileName(confName)
+	cfg := config.InitConfig(confName)
 	// 日志初始化
-	log.InitLogger()
+	log.InitLogger(cfg)
 
 }

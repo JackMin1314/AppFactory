@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gogf/gf/frame/g"
+	"AppFactory/pkg/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,7 +18,7 @@ var sugarLogger *zap.SugaredLogger
 var once sync.Once
 
 // InitLogger 日志初始化
-func InitLogger() {
+func InitLogger(cfgYml *config.ConfigYaml) {
 
 	once.Do(func() {
 		cfg := zap.NewProductionEncoderConfig()
@@ -26,7 +26,7 @@ func InitLogger() {
 		cfg.EncodeTime = func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString(t.Format("2006-01-02 15:04:05"))
 		}
-		writeSyncer := getLogWriter()
+		writeSyncer := getLogWriter(cfgYml)
 		encoder := getEncoder()
 		core := zapcore.NewTee(
 			zapcore.NewCore(encoder, writeSyncer, zapcore.InfoLevel),
@@ -52,19 +52,26 @@ func getEncoder() zapcore.Encoder {
 }
 
 // 日志写入文件
-func getLogWriter() zapcore.WriteSyncer {
-	config := g.Cfg("log")
-	if config == nil {
-		panic("config.toml file is not correct or not in config directort")
+func getLogWriter(cfg *config.ConfigYaml) zapcore.WriteSyncer {
+	if cfg == nil {
+		panic("configYaml is not initial or the file is not in configs directory")
 	}
-	folderPath := config.GetString("log.config.filePath")
-	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		// 必须分成两步：先创建文件夹、再修改权限
-		os.Mkdir(folderPath, 0755) //0755也可以os.ModePerm
-		os.Chmod(folderPath, 0755)
+	if cfg.Log.FileFolder == "" {
+		panic("log.filePath is not correct in config yaml")
+	} else {
+		if _, err := os.Stat(cfg.Log.FileFolder); os.IsNotExist(err) {
+			// 必须分成两步：先创建文件夹、再修改权限
+			os.Mkdir(cfg.Log.FileFolder, 0755) //0755也可以os.ModePerm
+			os.Chmod(cfg.Log.FileFolder, 0755)
+		}
 	}
+
 	// 根据配置文件配置的日志路径和文件名
-	folderPath = filepath.Join(folderPath, config.GetString("log.config.fileName"))
+	if cfg.Log.FileName == "" {
+		panic("log.fileName is not correct in config yaml")
+	}
+
+	folderPath := filepath.Join(cfg.Log.FileFolder, cfg.Log.FileName)
 	//_, err := os.Create(folderPath)
 	_, err := os.OpenFile(folderPath, os.O_APPEND|os.O_CREATE, 0666) // os.OpenFile(fileName,os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)会覆盖或重新创建
 	if err != nil {
@@ -72,11 +79,11 @@ func getLogWriter() zapcore.WriteSyncer {
 	}
 	// 新增日志切割和归档
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   folderPath,                  // 日志文件的位置
-		MaxSize:    config.GetInt("MaxSize"),    // 在进行切割之前，日志文件的最大大小
-		MaxBackups: config.GetInt("MaxBackups"), // 保留旧文件的最大个数
-		MaxAge:     config.GetInt("MaxAge"),     // 保留旧文件的最大天数
-		Compress:   config.GetBool("Compress"),  // 是否压缩
+		Filename:   folderPath,         // 日志文件的位置
+		MaxSize:    cfg.Log.MaxSize,    // 在进行切割之前，日志文件的最大大小
+		MaxBackups: cfg.Log.MaxBackups, // 保留旧文件的最大个数
+		MaxAge:     cfg.Log.MaxAge,     // 保留旧文件的最大天数
+		Compress:   cfg.Log.Compress,   // 是否压缩
 	}
 	return zapcore.AddSync(lumberJackLogger)
 }

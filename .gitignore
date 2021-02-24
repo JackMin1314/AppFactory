@@ -1,8 +1,10 @@
 /etc
 /logs
-/config/*.toml
 /build
 /test
 /pkg/rsa/etc
 */*_test.go
 */*.exe
+*.toml
+*.yaml
+*.conf
