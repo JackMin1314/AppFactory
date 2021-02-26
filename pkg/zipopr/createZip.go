@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"go.uber.org/zap"
@@ -55,10 +56,11 @@ func CreatZipFile(logger *zap.SugaredLogger, zipPathFileName, srcDir string) err
 		}
 
 		header.Name = path
-		// for win
-		// header.Name = strings.TrimPrefix(path, srcDir+`\`)
-		// for linux
-		header.Name = strings.TrimPrefix(path, srcDir+`/`)
+		if runtime.GOOS == "windows" {
+			header.Name = strings.TrimPrefix(path, srcDir+`\`)
+		} else {
+			header.Name = strings.TrimPrefix(path, srcDir+`/`)
+		}
 
 		// 判断：文件是不是文件夹
 		//if info.IsDir() {
@@ -128,4 +130,33 @@ func UnzipDir(logger *zap.SugaredLogger, zipPathFile, dir string) {
 			}
 		}()
 	}
+}
+
+// WalkZipDir 递归生成路径下所有目录的压缩文件
+func WalkZipDir(logger *zap.SugaredLogger, absFilePath, destFolderPath string) error {
+	fileList, err := ioutil.ReadDir(absFilePath)
+	if err != nil {
+		logger.Errorf("读取路径[%s]失败[%s]", absFilePath, err)
+		return err
+	}
+
+	nowUnixPath := strings.Replace(absFilePath, "\\", "/", -1)
+	parentBase := filepath.Base(nowUnixPath)
+	if len(fileList) == 0 {
+		return nil
+	}
+	for _, itemPath := range fileList {
+		if itemPath.IsDir() {
+			pathFile := filepath.Join(absFilePath, itemPath.Name())
+			destFilePath := filepath.Join(destFolderPath, parentBase+".zip")
+			if creatZipErr := CreatZipFile(logger, absFilePath, destFilePath); creatZipErr != nil {
+				logger.Infof("生成[%s]压缩文件失败[%s]", parentBase+".zip", creatZipErr)
+				return creatZipErr
+			}
+			if err := WalkZipDir(logger, pathFile, destFolderPath); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

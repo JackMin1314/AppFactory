@@ -37,7 +37,7 @@ import (
 // }
 type ApplicationYaml struct {
 	Name string
-	Mode string
+	Env string
 	Host string
 	Port int
 }
@@ -93,9 +93,20 @@ func NewConfigYaml() *ConfigYaml {
 	return new(ConfigYaml)
 }
 
-// InitConfig 初始化读取配置文件,成功会返回 config
-func InitConfig(confName string) *ConfigYaml {
+// InitConfigYaml 初始化读取配置文件,成功会返回 *ConfigYaml
+func InitConfigYaml(confName string) *ConfigYaml {
 
+	config := InitConfig(confName)
+	cfg := NewConfigYaml()
+	if err := config.Scan(cfg); err != nil {
+		panic(err)
+	}
+	return cfg
+
+}
+
+// InitConfig 初始化读取配置文件，成功返回config.Config
+func InitConfig(confName string) config.Config {
 	if confName == "" {
 		confName = "../config/config.yaml"
 	}
@@ -115,10 +126,5 @@ func InitConfig(confName string) *ConfigYaml {
 	if err := config.Load(); err != nil {
 		panic(err)
 	}
-	cfg := NewConfigYaml()
-	if err = config.Scan(cfg); err != nil {
-		panic(err)
-	}
-	return cfg
-
+	return config
 }
