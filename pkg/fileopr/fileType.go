@@ -1,4 +1,4 @@
-package model
+package fileopr
 
 const (
 	FILE_CSV  = "csv"

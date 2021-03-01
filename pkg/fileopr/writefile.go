@@ -1,7 +1,6 @@
 package fileopr
 
 import (
-	"AppFactory/internal/model"
 	"bufio"
 	"errors"
 	"os"
@@ -13,11 +12,11 @@ import (
 // WriteFileData 根据文件类型写入相应格式文件
 func WriteFileData(logger *zap.SugaredLogger, fileType string, fileName string, data [][]string) error {
 	switch fileType {
-	case model.FILE_CSV:
+	case FILE_CSV:
 		return WriteCSVFileData(logger, fileName, data)
-	case model.FILE_TXT:
+	case FILE_TXT:
 		return WriteTXTFileData(logger, fileName, data)
-	case model.FILE_XLSX:
+	case FILE_XLSX:
 		return WriteXLSXFileData(logger, fileName, data)
 	default:
 		return errors.New("unknown file type")

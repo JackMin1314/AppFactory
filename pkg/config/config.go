@@ -37,7 +37,7 @@ import (
 // }
 type ApplicationYaml struct {
 	Name string
-	Env string
+	Env  string
 	Host string
 	Port int
 }
@@ -108,7 +108,7 @@ func InitConfigYaml(confName string) *ConfigYaml {
 // InitConfig 初始化读取配置文件，成功返回config.Config
 func InitConfig(confName string) config.Config {
 	if confName == "" {
-		confName = "../config/config.yaml"
+		confName = "./configs/config.yaml"
 	}
 	absConfigPath, err := filepath.Abs(confName)
 	if err != nil {
