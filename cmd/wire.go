@@ -10,7 +10,6 @@ import (
 	"AppFactory/internal/data"
 	"AppFactory/internal/server"
 	"AppFactory/internal/service"
-	// "AppFactory/pkg/log"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
