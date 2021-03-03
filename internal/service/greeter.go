@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	v1 "AppFactory/api/webApp/v1"
 	"AppFactory/internal/biz"
+	// mylog "AppFactory/pkg/log"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -25,5 +27,9 @@ func NewGreeterService(uc *biz.GreeterUsecase, logger log.Logger) *GreeterServic
 // SayHello implements helloworld.GreeterServer
 func (s *GreeterService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1.HelloReply, error) {
 	s.log.Infof("SayHello Received: %v", in.GetName())
+	if in.GetName() == "jack" {
+		s.log.Errorf("received name [%s] is forbidden", in.GetName())
+		return &v1.HelloReply{Message: "you are jack,forbidden " + in.GetName()}, errors.New("user not allowed in ")
+	}
 	return &v1.HelloReply{Message: "Hello " + in.GetName()}, nil
 }
