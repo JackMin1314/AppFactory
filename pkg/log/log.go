@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	klog "github.com/go-kratos/kratos/v2/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -119,10 +120,26 @@ func (sug *ZapLog) Print(kvpair ...interface{}) {
 		kvpair = append(kvpair, "")
 	}
 	buf := sug.pool.Get().(*bytes.Buffer)
+	var logT klog.Level
 	for i := 0; i < len(kvpair); i += 2 {
 		fmt.Fprintf(buf, "%s=%v ", kvpair[i], kvpair[i+1])
+		value, ok := kvpair[i+1].(klog.Level)
+		if ok {
+			logT = value
+		}
 	}
-	sug.sugarLogger.Info(buf.String())
+	switch logT {
+	case klog.LevelDebug:
+		sug.sugarLogger.Debug(buf.String())
+	case klog.LevelInfo:
+		sug.sugarLogger.Info(buf.String())
+	case klog.LevelWarn:
+		sug.sugarLogger.Warn(buf.String())
+	case klog.LevelError:
+		sug.sugarLogger.Error(buf.String())
+	default:
+		sug.sugarLogger.Info(buf.String())
+	}
 	buf.Reset()
 	sug.pool.Put(buf)
 }
