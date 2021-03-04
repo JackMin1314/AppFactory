@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package api.webApp.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "AppFactory/api/webApp/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.webApp.v1";
+option java_outer_classname = "WebAppProtoV1";
+
+// AppExcel is a service definition
+service AppExcel {
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+            get: "/hello/{name}",
+        };
+    };
+    rpc GetStudent (GetStudentRequest) returns (GetStudentReply) {
+        option (google.api.http) = {
+            post: "/student/score_main",
+        };
+    };
+
+    // rpc CreateDemo (CreateDemoRequest) returns (CreateDemoReply);
+    // rpc UpdateDemo (UpdateDemoRequest) returns (UpdateDemoReply);
+    // rpc DeleteDemo (DeleteDemoRequest) returns (DeleteDemoReply);
+    // rpc GetDemo (GetDemoRequest) returns (GetDemoReply);
+    // rpc ListDemo (ListDemoRequest) returns (ListDemoReply);
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+    string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+    string message = 1;
+}
+
+message GetStudentRequest {
+    string exam_num = 1;
+    string student_name = 2;
+}
+message GetStudentReply {
+    string exam_num = 1;
+    string student_name = 2;
+    string class_name = 3;
+    string chinese_score = 4;
+    string math_score = 5;
+    string english_score = 6;
+    string total_score = 7;
+    string class_rate = 8;
+    string school_rate = 9;
+    string step_rank = 10;
+    string upload_date = 11;
+    string is_deleted = 12;
+    string delete_time =13;
+}
+// message CreateDemoRequest {}
+// message CreateDemoReply {}
+
+// message UpdateDemoRequest {}
+// message UpdateDemoReply {}
+
+// message DeleteDemoRequest {}
+// message DeleteDemoReply {}
+
+// message GetDemoRequest {}
+// message GetDemoReply {}
+
+// message ListDemoRequest {}
+// message ListDemoReply {}

@@ -1,22 +1,49 @@
 package data
 
 import (
-	"AppFactory/internal/conf"
+	"AppFactory/pkg/config"
+	"AppFactory/pkg/log"
+	"time"
 
+	"AppFactory/internal/data/ent"
+
+	"github.com/go-redis/redis/extra/redisotel"
+	redis "github.com/go-redis/redis/v8"
 	"github.com/google/wire"
+
+	// init mysql driver
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
+var ProviderSet = wire.NewSet(NewData,NewAppExcelImplRepo)
 
-// Data .
+// Data contains db and redis
 type Data struct {
-	// TODO warpped database client
+	db  *ent.Client
+	rdb *redis.Client
 }
 
 // NewData .
-func NewData(c *conf.Data) (*Data, error) {
-	return &Data{}, nil
+func NewData(c *config.ConfigYaml, logger *log.ZapLog) (*Data, error) {
+	client, err := ent.Open(c.Data.DataBase.Driver, c.Data.DataBase.Source)
+	if err != nil {
+		logger.Errorf("failed opening connection to sqlite: %v", err)
+		return nil, err
+	}
+	rdb := redis.NewClient(&redis.Options{
+		Addr:         c.Data.Redis.Addr,
+		Password:     c.Data.Redis.Password,
+		DB:           c.Data.Redis.Db,
+		DialTimeout:  time.Duration(c.Data.Redis.DialTimeout),
+		WriteTimeout: time.Duration(c.Data.Redis.WriteTimeout),
+		ReadTimeout:  time.Duration(c.Data.Redis.ReadTimeout),
+	})
+	rdb.AddHook(redisotel.TracingHook{})
+	return &Data{
+		db:  client,
+		rdb: rdb,
+	}, nil
 }
 
 /*
