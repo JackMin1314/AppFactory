@@ -16,7 +16,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData,NewAppExcelImplRepo)
+var ProviderSet = wire.NewSet(NewData, NewAppExcelImplRepo)
 
 // Data contains db and redis
 type Data struct {
@@ -35,9 +35,9 @@ func NewData(c *config.ConfigYaml, logger *log.ZapLog) (*Data, error) {
 		Addr:         c.Data.Redis.Addr,
 		Password:     c.Data.Redis.Password,
 		DB:           c.Data.Redis.Db,
-		DialTimeout:  time.Duration(c.Data.Redis.DialTimeout),
-		WriteTimeout: time.Duration(c.Data.Redis.WriteTimeout),
-		ReadTimeout:  time.Duration(c.Data.Redis.ReadTimeout),
+		DialTimeout:  time.Duration(c.Data.Redis.DialTimeout) * time.Second,
+		WriteTimeout: time.Duration(c.Data.Redis.WriteTimeout) * time.Second,
+		ReadTimeout:  time.Duration(c.Data.Redis.ReadTimeout) * time.Second,
 	})
 	rdb.AddHook(redisotel.TracingHook{})
 	return &Data{

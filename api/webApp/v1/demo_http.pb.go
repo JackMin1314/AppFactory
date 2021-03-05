@@ -5,71 +5,83 @@ package v1
 import (
 	context "context"
 	http1 "github.com/go-kratos/kratos/v2/transport/http"
+	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	mux "github.com/gorilla/mux"
 	http "net/http"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
-// context./http.
+var _ = new(http.Request)
+var _ = new(context.Context)
+var _ = binding.MapProto
+var _ = mux.NewRouter
+
 const _ = http1.SupportPackageIsVersion1
 
-type AppExcelHTTPServer interface {
+type AppExcelHandler interface {
 	GetStudent(context.Context, *GetStudentRequest) (*GetStudentReply, error)
 
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 }
 
-func RegisterAppExcelHTTPServer(s http1.ServiceRegistrar, srv AppExcelHTTPServer) {
-	s.RegisterService(&_HTTP_AppExcel_serviceDesc, srv)
-}
-
-func _HTTP_AppExcel_SayHello_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
-	var in HelloRequest
-
-	if err := http1.BindForm(req, &in); err != nil {
-		return nil, err
+func NewAppExcelHandler(srv AppExcelHandler, opts ...http1.HandleOption) http.Handler {
+	h := http1.DefaultHandleOptions()
+	for _, o := range opts {
+		o(&h)
 	}
+	r := mux.NewRouter()
 
-	if err := http1.BindVars(req, &in); err != nil {
-		return nil, err
-	}
+	r.HandleFunc("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
+		var in HelloRequest
 
-	out, err := srv.(AppExcelServer).SayHello(ctx, &in)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
+		if err := binding.MapProto(&in, mux.Vars(r)); err != nil {
+			h.Error(w, r, err)
+			return
+		}
 
-func _HTTP_AppExcel_GetStudent_0(srv interface{}, ctx context.Context, req *http.Request, dec func(interface{}) error) (interface{}, error) {
-	var in GetStudentRequest
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SayHello(ctx, req.(*HelloRequest))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		if err := h.Encode(w, r, out); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("GET")
 
-	if err := http1.BindForm(req, &in); err != nil {
-		return nil, err
-	}
+	r.HandleFunc("/student/score_main", func(w http.ResponseWriter, r *http.Request) {
+		var in GetStudentRequest
 
-	out, err := srv.(AppExcelServer).GetStudent(ctx, &in)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
+		if err := h.Decode(r, &in); err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		next := func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetStudent(ctx, req.(*GetStudentRequest))
+		}
+		if h.Middleware != nil {
+			next = h.Middleware(next)
+		}
+		out, err := next(r.Context(), &in)
+		if err != nil {
+			h.Error(w, r, err)
+			return
+		}
+		if err := h.Encode(w, r, out); err != nil {
+			h.Error(w, r, err)
+		}
+	}).Methods("POST")
 
-var _HTTP_AppExcel_serviceDesc = http1.ServiceDesc{
-	ServiceName: "api.webApp.v1.AppExcel",
-	Methods: []http1.MethodDesc{
-
-		{
-			Path:    "/hello/{name}",
-			Method:  "GET",
-			Handler: _HTTP_AppExcel_SayHello_0,
-		},
-
-		{
-			Path:    "/student/score_main",
-			Method:  "POST",
-			Handler: _HTTP_AppExcel_GetStudent_0,
-		},
-	},
-	Metadata: "demo.proto",
+	return r
 }
