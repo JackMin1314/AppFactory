@@ -19,8 +19,6 @@ import (
 
 // initApp init kratos application.
 func initApp(configYaml *config.ConfigYaml, zapLog *log.ZapLog) (*kratos.App, error) {
-	httpServer := server.NewHTTPServer(configYaml)
-	grpcServer := server.NewGRPCServer(configYaml)
 	dataData, err := data.NewData(configYaml, zapLog)
 	if err != nil {
 		return nil, err
@@ -28,6 +26,8 @@ func initApp(configYaml *config.ConfigYaml, zapLog *log.ZapLog) (*kratos.App, er
 	appExcelRepo := data.NewAppExcelImplRepo(dataData, zapLog)
 	appExcelUsecase := biz.NewAppExcelUsecase(appExcelRepo, zapLog)
 	appExcelService := service.NewAppExcelService(zapLog, appExcelUsecase)
-	app := newApp(zapLog, httpServer, grpcServer, appExcelService)
+	httpServer := server.NewHTTPServer(configYaml, appExcelService)
+	grpcServer := server.NewGRPCServer(configYaml, appExcelService)
+	app := newApp(zapLog, httpServer, grpcServer)
 	return app, nil
 }

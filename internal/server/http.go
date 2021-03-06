@@ -1,6 +1,8 @@
 package server
 
 import (
+	pb "AppFactory/api/webApp/v1"
+	"AppFactory/internal/service"
 	"AppFactory/pkg/config"
 	"time"
 
@@ -12,16 +14,9 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *config.ConfigYaml) *http.Server {
-	var opts = []http.ServerOption{
-		http.Middleware(
-			middleware.Chain(
-				recovery.Recovery(),
-				tracing.Server(),
-				logging.Server(),
-			),
-		),
-	}
+func NewHTTPServer(c *config.ConfigYaml, appsrv *service.AppExcelService) *http.Server {
+	var opts = []http.ServerOption{}
+
 	if c.Server.Http.Network != "" {
 		opts = append(opts, http.Network(c.Server.Http.Network))
 	}
@@ -29,7 +24,17 @@ func NewHTTPServer(c *config.ConfigYaml) *http.Server {
 		opts = append(opts, http.Address(c.Server.Http.Addr))
 	}
 	if c.Server.Http.Timeout != 0 {
-		opts = append(opts, http.Timeout(time.Duration(c.Server.Http.Timeout) * time.Second))
+		opts = append(opts, http.Timeout(time.Duration(c.Server.Http.Timeout)*time.Second))
 	}
-	return http.NewServer(opts...)
+	srv := http.NewServer(opts...)
+	m := http.Middleware(
+		middleware.Chain(
+			recovery.Recovery(),
+			tracing.Server(),
+			logging.Server(),
+		),
+	)
+	srv.HanldePrefix("/", pb.NewAppExcelHandler(appsrv, m))
+
+	return srv
 }

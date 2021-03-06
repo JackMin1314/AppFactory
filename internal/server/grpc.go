@@ -1,6 +1,8 @@
 package server
 
 import (
+	pb "AppFactory/api/webApp/v1"
+	"AppFactory/internal/service"
 	"AppFactory/pkg/config"
 	"time"
 
@@ -13,7 +15,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *config.ConfigYaml) *grpc.Server {
+func NewGRPCServer(c *config.ConfigYaml, appsrv *service.AppExcelService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			middleware.Chain(
@@ -33,5 +35,7 @@ func NewGRPCServer(c *config.ConfigYaml) *grpc.Server {
 	if c.Server.Grpc.Timeout != 0 {
 		opts = append(opts, grpc.Timeout(time.Duration(c.Server.Grpc.Timeout)*time.Second))
 	}
-	return grpc.NewServer(opts...)
+	srv := grpc.NewServer(opts...)
+	pb.RegisterAppExcelServer(srv, appsrv)
+	return srv
 }

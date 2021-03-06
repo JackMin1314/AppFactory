@@ -58,6 +58,6 @@ func (ap *AppExcelImplRepo) QueryScoreMain(ctx context.Context, stu *biz.AppExce
 
 	return stuReply, nil
 }
-func (ap *AppExcelImplRepo) QueryScoreMajor(ctx context.Context, stu *biz.AppExcel) (*pb.GetStudentReply, error) {
+func (ap *AppExcelImplRepo) InsertScoreMain(ctx context.Context, stu *biz.AppExcel) (*pb.GetStudentReply, error) {
 	return nil, nil
 }

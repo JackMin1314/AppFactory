@@ -3,8 +3,6 @@ package main
 import (
 	"os"
 
-	pb "AppFactory/api/webApp/v1"
-	"AppFactory/internal/service"
 	"AppFactory/pkg/config"
 	mylog "AppFactory/pkg/log"
 
@@ -53,9 +51,7 @@ func init() {
 
 }
 
-func newApp(logger *mylog.ZapLog, hs *http.Server, gs *grpc.Server, service *service.AppExcelService) *kratos.App {
-	pb.RegisterAppExcelServer(gs, service)
-	pb.RegisterAppExcelHTTPServer(hs, service)
+func newApp(logger *mylog.ZapLog, hs *http.Server, gs *grpc.Server) *kratos.App {
 	return kratos.New(
 		kratos.Name(Name),
 		kratos.Version(Version),
