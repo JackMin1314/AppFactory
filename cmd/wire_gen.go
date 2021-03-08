@@ -7,27 +7,27 @@ package main
 
 import (
 	"AppFactory/internal/biz"
-	"AppFactory/internal/conf"
 	"AppFactory/internal/data"
 	"AppFactory/internal/server"
 	"AppFactory/internal/service"
+	"AppFactory/pkg/config"
+	"AppFactory/pkg/log"
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Injectors from wire.go:
 
 // initApp init kratos application.
-func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, error) {
-	httpServer := server.NewHTTPServer(confServer)
-	grpcServer := server.NewGRPCServer(confServer)
-	dataData, err := data.NewData(confData)
+func initApp(configYaml *config.ConfigYaml, zapLog *log.ZapLog) (*kratos.App, error) {
+	dataData, err := data.NewData(configYaml, zapLog)
 	if err != nil {
 		return nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase, logger)
-	app := newApp(logger, httpServer, grpcServer, greeterService)
+	appExcelRepo := data.NewAppExcelImplRepo(dataData, zapLog)
+	appExcelUsecase := biz.NewAppExcelUsecase(appExcelRepo, zapLog)
+	appExcelService := service.NewAppExcelService(zapLog, appExcelUsecase)
+	httpServer := server.NewHTTPServer(configYaml, appExcelService)
+	grpcServer := server.NewGRPCServer(configYaml, appExcelService)
+	app := newApp(zapLog, httpServer, grpcServer)
 	return app, nil
 }

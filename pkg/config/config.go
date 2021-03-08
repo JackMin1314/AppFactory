@@ -44,11 +44,13 @@ type ApplicationYaml struct {
 type ServerYaml struct {
 	Http struct {
 		Addr    string
-		Timeout string
+		Timeout int
+		Network string
 	}
 	Grpc struct {
 		Addr    string
-		Timeout string
+		Timeout int
+		Network string
 	}
 }
 type DataYaml struct {
@@ -58,9 +60,11 @@ type DataYaml struct {
 	}
 	Redis struct {
 		Addr         string
-		DialTimeout  string
-		ReadTimeout  string
-		WriteTimeout string
+		Db           int
+		Password	 string
+		DialTimeout  int
+		ReadTimeout  int
+		WriteTimeout int
 	}
 }
 type LogYaml struct {

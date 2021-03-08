@@ -13,5 +13,17 @@ option objc_class_prefix = "KratosDemoErrors";
 enum Helloworld {
     option (kratos.api.errors) = true;
 
-    MissingName = 0;
+    MissingStuName = 0;
+    MissingExamNum = 1;
+}
+
+message Status {
+    // 错误码，跟 grpc-status 一致，并且在HTTP中可映射成 http-status
+    int32 code = 1;
+    // 错误原因，定义为业务判定错误码
+    string reason = 2;
+    // 错误信息，为用户可读的信息，可作为用户提示内容
+    string message = 3;
+    // 错误详细信息，可以附加自定义的信息列表
+    // repeated google.protobuf.Any details = 4;
 }

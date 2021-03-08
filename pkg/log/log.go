@@ -47,7 +47,7 @@ func InitLogger(cfgYml *config.ConfigYaml) {
 			)
 		}
 
-		logger := zap.New(core, zap.AddCaller())
+		logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1)) // 封装了日志对象，所有打印的时候需要跳一层
 		defer logger.Sync()
 		log.sugarLogger = logger.Sugar()
 		log.sugarLogger.Info("first init logger success")

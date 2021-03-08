@@ -1,7 +1,10 @@
 package server
 
 import (
-	"AppFactory/internal/conf"
+	pb "AppFactory/api/webApp/v1"
+	"AppFactory/internal/service"
+	"AppFactory/pkg/config"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
@@ -12,7 +15,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server) *grpc.Server {
+func NewGRPCServer(c *config.ConfigYaml, appsrv *service.AppExcelService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			middleware.Chain(
@@ -23,14 +26,16 @@ func NewGRPCServer(c *conf.Server) *grpc.Server {
 			),
 		),
 	}
-	if c.Grpc.Network != "" {
-		opts = append(opts, grpc.Network(c.Grpc.Network))
+	if c.Server.Grpc.Network != "" {
+		opts = append(opts, grpc.Network(c.Server.Grpc.Network))
 	}
-	if c.Grpc.Addr != "" {
-		opts = append(opts, grpc.Address(c.Grpc.Addr))
+	if c.Server.Grpc.Addr != "" {
+		opts = append(opts, grpc.Address(c.Server.Grpc.Addr))
 	}
-	if c.Grpc.Timeout != nil {
-		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
+	if c.Server.Grpc.Timeout != 0 {
+		opts = append(opts, grpc.Timeout(time.Duration(c.Server.Grpc.Timeout)*time.Second))
 	}
-	return grpc.NewServer(opts...)
+	srv := grpc.NewServer(opts...)
+	pb.RegisterAppExcelServer(srv, appsrv)
+	return srv
 }
