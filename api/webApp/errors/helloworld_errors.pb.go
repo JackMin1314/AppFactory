@@ -11,9 +11,14 @@ import (
 const _ = errors.SupportPackageIsVersion1
 
 const (
-	Errors_MissingName = "Helloworld_MissingName"
+	Errors_MissingStuName = "Helloworld_MissingStuName"
+	Errors_MissingExamNum = "Helloworld_MissingExamNum"
 )
 
-func IsMissingName(err error) bool {
-	return errors.Reason(err) == Errors_MissingName
+func IsMissingStuName(err error) bool {
+	return errors.Reason(err) == Errors_MissingStuName
+}
+
+func IsMissingExamNum(err error) bool {
+	return errors.Reason(err) == Errors_MissingExamNum
 }

@@ -4,7 +4,8 @@ import (
 	pb "AppFactory/api/webApp/v1"
 	"AppFactory/pkg/log"
 	"context"
-	"errors"
+	kerr "github.com/go-kratos/kratos/v2/errors"
+	apierr "AppFactory/api/webApp/errors"
 )
 
 type AppExcel struct {
@@ -33,7 +34,7 @@ func NewAppExcelUsecase(bizRepo AppExcelRepo, logger *log.ZapLog) *AppExcelUseca
 
 func (uc *AppExcelUsecase) QueryMain(ctx context.Context, appexcel *AppExcel) (*pb.GetStudentReply, error) {
 	if appexcel == nil || appexcel.ExamNum == "" || appexcel.StudentName == "" {
-		return nil, errors.New("学生学号或姓名不能为空！")
+		return nil, kerr.InvalidArgument(apierr.Helloworld_MissingStuName.String(), "考号[%s]或者用户名信息缺少", appexcel.ExamNum)
 	}
 	uc.logger.Infof("收到查询主科目的学生学号[%s]和姓名[%s]", appexcel.ExamNum, appexcel.StudentName)
 	stReply, err := uc.repo.QueryScoreMain(ctx, appexcel)
@@ -45,7 +46,7 @@ func (uc *AppExcelUsecase) QueryMain(ctx context.Context, appexcel *AppExcel) (*
 
 func (uc *AppExcelUsecase) InsertMain(ctx context.Context, appexcel *AppExcel) (*pb.GetStudentReply, error) {
 	if appexcel == nil || appexcel.ExamNum == "" || appexcel.StudentName == "" {
-		return nil, errors.New("学生学号或姓名不能为空！")
+		return nil, kerr.InvalidArgument(apierr.Helloworld_MissingStuName.String(), "考号[%s]或者用户名信息缺少", appexcel.ExamNum)
 	}
 	uc.logger.Infof("收到查询核心科目的学生学号[%s]和姓名[%s]", appexcel.ExamNum, appexcel.StudentName)
 	stReply, err := uc.repo.InsertScoreMain(ctx, appexcel)
