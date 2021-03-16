@@ -3,7 +3,7 @@ module AppFactory
 go 1.15
 
 require (
-	entgo.io/ent v0.6.0
+	entgo.io/ent v0.7.0
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.3.2
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/gin-gonic/gin v1.6.3
@@ -20,9 +20,9 @@ require (
 	github.com/sony/sonyflake v1.0.0
 	github.com/spf13/cobra v1.1.3
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
+	golang.org/x/crypto v0.0.0-20210314154223-e6e6c4f2bb5b
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	google.golang.org/genproto v0.0.0-20210311153111-e2979279ddde
+	google.golang.org/genproto v0.0.0-20210315173758-2651cd453018
 	google.golang.org/grpc v1.36.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
