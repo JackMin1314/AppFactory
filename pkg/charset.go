@@ -42,15 +42,15 @@ func XMLGBKDecoder(content []byte) *xml.Decoder {
 	return decoder
 }
 
-// 将utf-8的xml结构体字段用GBK编码并返回编码后的[]byte (not completely test)
+// 将utf-8的xml结构体字段用GBK编码并返回编码后的[]byte (设置"Content-Type", "text/xml;charset=GBK")
 func XMLGBKEncoder(v interface{}) []byte {
 	buffer := &bytes.Buffer{}
-	GBKEncoder.NewWriter(buffer)
-	xmlEnc := xml.NewEncoder(buffer)
-	// xmlEnc.Indent("", "	")
-	if xmlEnc.Encode(v) != nil {
+	data, err := xml.Marshal(v)
+	if err != nil {
 		return nil
 	}
+	gbker := GBKEncoder.NewWriter(buffer)
+	gbker.Write(data)
 	return buffer.Bytes()
 }
 
