@@ -1,6 +1,6 @@
 module AppFactory
 
-go 1.15
+go 1.16
 
 require (
 	entgo.io/ent v0.7.0
@@ -22,8 +22,8 @@ require (
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	google.golang.org/genproto v0.0.0-20210324141432-3032e8ff099e
-	google.golang.org/grpc v1.36.0
+	google.golang.org/genproto v0.0.0-20210325224202-eed09b1b5210
+	google.golang.org/grpc v1.36.1
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.4.0
