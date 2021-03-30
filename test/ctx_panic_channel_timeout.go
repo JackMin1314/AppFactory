@@ -9,12 +9,14 @@ import (
 )
 
 func main() {
-	const numtimes = 1000
+	const numtimes = 10
 
 	startT := time.Now()
 	var wg sync.WaitGroup
 	wg.Add(numtimes)
 
+	// 进行处理
+	// 模拟100个超时并发请求,需要等待全部有返回
 	for i := 0; i < numtimes; i++ {
 		go func() {
 
@@ -25,7 +27,7 @@ func main() {
 				}
 			}()
 			defer wg.Done()
-			request(context.Background(), "test")
+			requestwork(context.Background(), "test")
 		}()
 
 	}
@@ -34,36 +36,43 @@ func main() {
 
 	endT := time.Since(startT)
 	fmt.Printf("total time:%s\n", endT)
+	// 等待所有执行完
 	time.Sleep(15 * time.Second)
 	fmt.Printf("goroutine num:%d\n", runtime.NumGoroutine())
 }
 
-func request(ctx context.Context, req interface{}) error {
+func requestwork(ctx context.Context, req interface{}) error {
 
+	// 比对传入的ctx时间和超时时间
 	ctx1, cancel := ShrinkDeadline(ctx, 2*time.Second)
 	// ctx1, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
+	chanErr := make(chan error, 1) // 有缓冲， done <- dowork 不管是否超时都能写入而不卡住goroutine
+	/**
+	* 一旦requestwork超时立马返回error
+	select{
+	case e := <- chanErr:
+		return e
+	case <- ctx1.Done():
+		return ctx1.Err()
+	}
+	**/
 
-	/*
-		// 解决每个超时请求占用一个goroutine的bug，添加buffer size 1
-		errchan := make(chan error,1) // 不管是否超时都能写入而不卡住goroutine
-		go func() {
-			errchan <- workjob(req)
-		}()
-
-		select {
-		case myerr := <-errchan:
-			return myerr
-
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	*/
-
-	//
-	errchan := make(chan error, 0)
+	/**
+	* 当requestwork 超时时不立刻返回，等待dowork执行完
+	select {
+	case e := <-chanErr:
+		return e
+	case <-ctx1.Done():
+		// 一直等待 dowork 执行完有结果
+		<-chanErr
+		cancel()
+		return ctx1.Err()
+	}
+	**/
 	panicChan := make(chan interface{}, 1)
 	// 新起了一个协程,如果panic则无法被捕捉
+	// 启一个协程调用超时处理函数
 	go func() {
 		// 捕捉panic
 		defer func() {
@@ -71,26 +80,26 @@ func request(ctx context.Context, req interface{}) error {
 				panicChan <- p
 			}
 		}()
-		errchan <- workjob(req)
+		chanErr <- dowork(req)
 	}()
 
 	select {
-	case myerr := <-errchan:
+	case myerr := <-chanErr:
 		return myerr
 
 	case <-ctx1.Done():
-		<-errchan // 阻塞在这里，等待直到workjob执行完或返回结果.
-		cancel()
+		// <-chanErr // 阻塞在这里，等待直到dowork返回结果.
+		// cancel()
 		return ctx1.Err()
 	case pc := <-panicChan:
-		panic(pc) // request panic
+		panic(pc) // request panic 模拟
 	}
 
 }
 
-func workjob(value interface{}) error {
+func dowork(value interface{}) error {
 	time.Sleep(10 * time.Second)
-	panic("evil intrigue")
+	// panic("evil intrigue")
 	return nil
 }
 
