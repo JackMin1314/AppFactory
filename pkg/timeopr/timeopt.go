@@ -1,6 +1,7 @@
 package timeopr
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -21,10 +22,22 @@ func GetBeforeOneDay(dateStr string) string {
 }
 
 // GetDateTimeFormat 获取时间年月日、月、日等
-func GetDateTimeFormat()  {
-	allDate:= time.Now().Format("20060102")
-	YearMD:= time.Now().Format("060102")
-	YearM:= time.Now().Format("200601")
-	MonthDay:= time.Now().Format("0102")
-	fmt.Println(allDate,YearMD,YearM,MonthDay)
+func GetDateTimeFormat() {
+	allDate := time.Now().Format("20060102")
+	YearMD := time.Now().Format("060102")
+	YearM := time.Now().Format("200601")
+	MonthDay := time.Now().Format("0102")
+	fmt.Println(allDate, YearMD, YearM, MonthDay)
+}
+
+// 超时小于给定的时间，则用超时的时间创建
+func ShrinkDeadline(ctx context.Context, timeout time.Duration) (context.Context, func()) {
+	if deadline, ok := ctx.Deadline(); ok {
+		leftTime := time.Until(deadline)
+		if leftTime < timeout {
+			timeout = leftTime
+		}
+	}
+
+	return context.WithDeadline(ctx, time.Now().Add(timeout))
 }
