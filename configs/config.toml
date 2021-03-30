@@ -1,0 +1,44 @@
+[application]
+    name = "webApp"
+    mode = "dev"
+    host = "127.0.0.1"
+    port = 8088
+
+[database]
+    [[database.default]]
+        type = "mysql"
+        link  = "root:5201020@tcp(127.0.0.1:3306)/demo_db"
+        maxIdle = "10"
+        maxOpen = "100"
+        maxLifetime = "30"
+
+[gfcli]
+    [[gfcli.gen.dao]]
+        link   = "mysql:root:5201020@tcp(127.0.0.1:3306)/demo_db"
+        group  = ""
+        prefix = ""
+        removePrefix = "t_"
+        tables = "t_user" #"query_exam_main,query_exam_all"
+
+[redis]
+    default = "127.0.0.1:6379,1,?idleTimeout=600"
+    cache   = "127.0.0.1:6379,2,?idleTimeout=600"
+
+# 服务端jwt配置(适用于server端)
+[jwt]
+    ExpiresAt   = 1             # 过期时间1天
+    RefreshAt   = 48           # 刷新时间2天 (24 * 2 = 48)
+    SecretKey  = "App!1@2#3"  # 签名(密钥)
+
+[casbin]
+    modelFile   = "./config/casbin/rbac_model.conf" #模型文件
+    # policyFile  = "./config/casbin/rbac_policy.csv" #写有权限内容的文件
+
+[log]
+    [log.config]
+        filePath = "./logs"
+        fileName = "Record.log"
+        MaxSize = 10    # 在进行切割之前，日志文件的最大大小
+        MaxBackups = 30 # 保留旧文件的最大个数
+        MaxAge = 7      # 保留旧文件的最大天数
+        Compress = false # 是否压缩
