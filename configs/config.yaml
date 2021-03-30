@@ -1,0 +1,45 @@
+application:
+    name: webApp
+    env: dev
+    host: 127.0.0.1
+    port: 8088
+
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 10
+    network: 
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 10
+    network:
+
+data:
+  database:
+    driver: mysql
+    source: root:5201020@tcp(127.0.0.1:3306)/demo_db
+  redis:
+    addr: 127.0.0.1:6379
+    db: 0
+    password:
+    dial_timeout: 1
+    read_timeout: 1
+    write_timeout: 1
+
+log:
+    fileFolder: ./logs
+    fileName: Record.log
+    MaxSize: 10    # 在进行切割之前，日志文件的最大大小
+    MaxBackups: 30 # 保留旧文件的最大个数
+    MaxAge: 7      # 保留旧文件的最大天数
+    Compress: false # 是否压缩
+
+# 服务端jwt配置(适用于server端)
+jwt:
+    ExpiresAt: 1             # 过期时间1天
+    RefreshAt: 48           # 刷新时间2天 (24 * 2 = 48)
+    SecretKey: App!1@2#3  # 签名(密钥)
+
+casbin:
+    modelFile: ./config/casbin/rbac_model.conf #模型文件
+    # policyFile  = "./config/casbin/rbac_policy.csv" #写有权限内容的文件

@@ -34,7 +34,7 @@ func NewHTTPServer(c *config.ConfigYaml, appsrv *service.AppExcelService) *http.
 			logging.Server(),
 		),
 	)
-	srv.HanldePrefix("/", pb.NewAppExcelHandler(appsrv, m))
+	srv.HandlePrefix("/", pb.NewAppExcelHandler(appsrv, m))
 
 	return srv
 }
